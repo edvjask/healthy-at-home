@@ -1,6 +1,6 @@
 ﻿namespace HealthyAtHomeAPI.Enumerators;
 
-public enum EMuscleGroups : byte
+public enum EMuscleGroup
 {
     Chest = 2,
     Back = 3,

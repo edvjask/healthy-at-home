@@ -4,5 +4,5 @@ namespace HealthyAtHomeAPI.Repository;
 
 public interface ITrainingPlanRepository
 {
-    Task<TrainingPlan> AddNewAsync(TrainingPlan trainingPlan);
+    Task AddNewAsync(TrainingPlan trainingPlan);
 }

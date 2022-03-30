@@ -10,9 +10,8 @@ public class TrainingPlanRepository : BaseRepository, ITrainingPlanRepository
     }
 
 
-    public async Task<TrainingPlan> AddNewAsync(TrainingPlan trainingPlan)
+    public async Task AddNewAsync(TrainingPlan trainingPlan)
     {
         await _context.TrainingPlans.AddAsync(trainingPlan);
-        return new TrainingPlan();
     }
 }

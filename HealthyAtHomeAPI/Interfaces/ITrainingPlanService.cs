@@ -1,8 +1,9 @@
-﻿using HealthyAtHomeAPI.Models;
+﻿using HealthyAtHomeAPI.DTOs.training_plan;
 
 namespace HealthyAtHomeAPI.Interfaces;
 
 public interface ITrainingPlanService
 {
-    Task<TrainingPlan> GenerateAsync(TrainingPlanOptions trainingPlanOptions);
+    Task<List<TrainingPlanAlternativesGroup>> GenerateAlternativesAsync(NewTrainingPlanRequestDto trainingPlanOptions);
+    Task<SaveTrainingPlan> SaveTrainingPlanAsync(SaveTrainingPlan options);
 }

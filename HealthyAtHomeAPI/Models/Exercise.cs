@@ -9,11 +9,13 @@ public class Exercise
 
     [Required] public string Name { get; set; }
 
-    [MaxLength(200)] public string? Description { get; set; }
+    [MaxLength(200)] public string? Instructions { get; set; }
+
+    public ICollection<ExerciseCue> ExerciseCues { get; set; } = new List<ExerciseCue>();
 
     public ELevelsOfDifficulty ExerciseDifficulty { get; set; }
     public ICollection<EInventoryType> InventoryTypes { get; set; } = new List<EInventoryType>();
-    public ICollection<EMuscleGroups> MuscleGroups { get; set; } = new List<EMuscleGroups>();
+    public ICollection<EMuscleGroup> MuscleGroups { get; set; } = new List<EMuscleGroup>();
     public EExerciseType ExerciseType { get; set; }
     public string? YoutubeLink { get; set; }
 

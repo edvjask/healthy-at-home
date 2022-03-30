@@ -1,12 +1,11 @@
-﻿using HealthyAtHomeAPI.Interfaces;
-using HealthyAtHomeAPI.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using HealthyAtHomeAPI.DTOs.training_plan;
+using HealthyAtHomeAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthyAtHomeAPI.Controllers;
 
 [Route("/api/training-plan")]
-[Authorize]
+//[Authorize]
 public class TrainingPlanController : Controller
 {
     private readonly ITrainingPlanService _trainingPlanService;
@@ -17,9 +16,14 @@ public class TrainingPlanController : Controller
     }
 
     [HttpPost("generate")]
-    public async Task<TrainingPlan> GenerateNewPlan([FromBody] TrainingPlanOptions trainingPlanOptions)
+    public async Task<IActionResult> GenerateNewPlan([FromBody] NewTrainingPlanRequestDto options)
     {
-        var plan = await _trainingPlanService.GenerateAsync(trainingPlanOptions);
-        return plan;
+        return Ok(await _trainingPlanService.GenerateAlternativesAsync(options));
+    }
+
+    [HttpPost("save-with-options")]
+    public async Task<IActionResult> SaveNewPlanWithOptions([FromBody] SaveTrainingPlan trainingPlanWithOptions)
+    {
+        return Ok(await _trainingPlanService.SaveTrainingPlanAsync(trainingPlanWithOptions));
     }
 }

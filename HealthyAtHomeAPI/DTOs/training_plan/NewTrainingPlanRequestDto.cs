@@ -1,11 +1,10 @@
 ﻿using HealthyAtHomeAPI.Enumerators;
+using HealthyAtHomeAPI.Models;
 
-namespace HealthyAtHomeAPI.Models;
+namespace HealthyAtHomeAPI.DTOs.training_plan;
 
-public class TrainingPlanOptions
+public class NewTrainingPlanRequestDto
 {
-    public int Id { get; set; }
-
     public EGender Gender { get; set; }
     public string Height { get; set; }
     public EHeightUnits HeightUnits { get; set; }
@@ -13,9 +12,8 @@ public class TrainingPlanOptions
     public EWeightUnits WeightUnits { get; set; }
     public int Age { get; set; }
 
-    public TrainingPlan TrainingPlan { get; set; }
-    public ICollection<EInventoryType> InventoryTypes { get; set; } = new HashSet<EInventoryType>();
+    public ICollection<EInventoryType> InventoryTypes { get; set; } = new List<EInventoryType>();
     public PhysicalResults PhysicalResults { get; set; }
     public EWorkoutGoal WorkoutGoal { get; set; }
-    public ICollection<EMuscleGroup> MuscleGroupsWanted { get; set; } = new HashSet<EMuscleGroup>();
+    public ICollection<EMuscleGroup> MuscleGroupsWanted { get; set; } = new List<EMuscleGroup>();
 }

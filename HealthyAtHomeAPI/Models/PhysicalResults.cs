@@ -9,4 +9,6 @@ public class PhysicalResults
     public ELevelsOfDifficulty PushingStrength { get; set; }
     public ELevelsOfDifficulty LegStrength { get; set; }
     public ELevelsOfDifficulty Stamina { get; set; }
+
+    public ELevelsOfDifficulty CoreStrength { get; set; }
 }
