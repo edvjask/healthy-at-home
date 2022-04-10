@@ -6,7 +6,7 @@ public class SaveTrainingPlan
 
     public string Name { get; set; }
 
-    public string OwnerUid { get; set; }
+    public string IdToken { get; set; }
 
     public List<int> exerciseIds { get; set; }
 }

@@ -8,6 +8,8 @@ public class TrainingPlan
 
     [Required] public string Name { get; set; }
 
+    public DateTime CreationDate { get; set; }
+
     [Required] public string OwnerUid { get; set; }
 
     public virtual ICollection<Exercise> Exercises { get; set; } = new HashSet<Exercise>();

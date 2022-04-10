@@ -165,6 +165,19 @@ public class AppDbContext : DbContext
                 .AddMuscleGroup(EMuscleGroup.Core)
                 .AddYoutubeLink("https://www.youtube.com/embed/QyVq5oUBpss")
                 .AddEasierVariationId(7)
+                .Build(),
+            exerciseBuilder
+                .Reset()
+                .AddId(9)
+                .AddInstruction(
+                    "Squat down by bending hips back while allowing knees to bend forward, keeping back straight and knees pointed same direction as feet." +
+                    " Descend until thighs are just past parallel to floor." +
+                    " Squat up by extending knees and hips until legs are straight. Return and repeat.")
+                .AddName("Bodyweight Squat")
+                .AddDifficulty(ELevelsOfDifficulty.Novice)
+                .AddType(EExerciseType.Legs)
+                .AddMuscleGroup(EMuscleGroup.Legs)
+                .AddYoutubeLink("https://www.youtube.com/embed/gsNoPYwWXeM")
                 .Build()
         );
         builder.Entity<ExerciseCue>().HasData(

@@ -36,7 +36,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+        });
+});
 
 //Configure Firebase auth
 
@@ -78,7 +85,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //cors
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"));
+app.UseCors();
 
 app.UseRouting();
 

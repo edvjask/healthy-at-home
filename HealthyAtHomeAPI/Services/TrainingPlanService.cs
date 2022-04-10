@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FirebaseAdmin.Auth;
 using HealthyAtHomeAPI.DTOs.training_plan;
 using HealthyAtHomeAPI.Enumerators;
 using HealthyAtHomeAPI.Helpers;
@@ -43,15 +44,18 @@ public class TrainingPlanService : ITrainingPlanService
 
     public async Task<SaveTrainingPlan> SaveTrainingPlanAsync(SaveTrainingPlan options)
     {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(options.IdToken);
+        
         var chosenExercises = await _exerciseRepository.GetByIds(options.exerciseIds);
 
         var newTrainingPlanOptions = _mapper.Map<NewTrainingPlanRequestDto, TrainingPlanOptions>(options.planOptions);
 
         var newTrainingPlan = new TrainingPlan
         {
+            CreationDate = DateTime.Now,
             Exercises = chosenExercises,
             Name = options.Name,
-            OwnerUid = options.OwnerUid,
+            OwnerUid = decodedToken.Uid,
             Options = newTrainingPlanOptions
         };
 
@@ -60,6 +64,13 @@ public class TrainingPlanService : ITrainingPlanService
         await _unitOfWork.CompleteAsync();
 
         return options;
+    }
+
+    public async Task<List<TrainingPlan>> GetAllForUser(string token)
+    {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+        return await _trainingPlanRepository.GetAllForUser(decodedToken.Uid);
     }
 
     private List<TrainingPlanAlternativesGroup> GetExercises(NewTrainingPlanRequestDto trainingPlanOptions,

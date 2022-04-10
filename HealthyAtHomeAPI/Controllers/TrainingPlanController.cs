@@ -26,4 +26,10 @@ public class TrainingPlanController : Controller
     {
         return Ok(await _trainingPlanService.SaveTrainingPlanAsync(trainingPlanWithOptions));
     }
+
+    [HttpPost("get-all")]
+    public async Task<IActionResult> GetAll([FromBody] GetPlansRequest request)
+    {
+        return Ok(await _trainingPlanService.GetAllForUser(request.accessToken));
+    }
 }
