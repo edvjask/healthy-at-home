@@ -25,4 +25,13 @@ public class TrainingPlanRepository : BaseRepository, ITrainingPlanRepository
             .OrderByDescending(tp => tp.CreationDate)
             .ToListAsync();
     }
+
+    public async Task<TrainingPlan> GetById(int id)
+    {
+        return await _context.TrainingPlans
+            .Include(t => t.Options)
+            .Include(t => t.Exercises)
+            .Where(t => t.Id == id)
+            .FirstAsync();
+    } 
 }
