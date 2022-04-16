@@ -27,6 +27,12 @@ public class WorkoutProgramController : Controller
         return Ok(await _workoutProgramService.DeleteProgram(request, id));
     }
 
+    [HttpPost("get-summary")]
+    public async Task<IActionResult> GetWorkoutProgramSummary([FromBody] WorkoutProgramRequest request)
+    {
+        return Ok(await _workoutProgramService.GetSummaryById(request));
+    }
+
     // [HttpPost("save-with-options")]
     // public async Task<IActionResult> SaveNewPlanWithOptions([FromBody] SaveTrainingPlan trainingPlanWithOptions)
     // {

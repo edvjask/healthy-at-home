@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using HealthyAtHomeAPI.Interfaces;
+using HealthyAtHomeAPI.Middlewares;
 using HealthyAtHomeAPI.Persistence.Contexts;
 using HealthyAtHomeAPI.Persistence.Repositories;
 using HealthyAtHomeAPI.Repository;
@@ -99,5 +100,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();

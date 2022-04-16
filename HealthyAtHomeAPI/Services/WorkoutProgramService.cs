@@ -5,6 +5,7 @@ using HealthyAtHomeAPI.Enumerators;
 using HealthyAtHomeAPI.Interfaces;
 using HealthyAtHomeAPI.Models;
 using HealthyAtHomeAPI.Repository;
+using HealthyAtHomeAPI.Services.Communication;
 
 namespace HealthyAtHomeAPI.Services;
 
@@ -31,14 +32,16 @@ public class WorkoutProgramService : IWorkoutProgramService
     }
 
 
-    public async Task<string> GenerateSchedule(GenerateScheduleRequest request)
+    public async Task<GenericResponse<NewWorkoutProgramResponse>> GenerateSchedule(GenerateScheduleRequest request)
     {
         //verify token and plan ownership
         var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.UserToken);
 
         var trainingPlan = await _trainingPlanRepository.GetById(request.TrainingPlanId);
 
-        if (trainingPlan == null || trainingPlan.OwnerUid != decodedToken.Uid) return "wrong result";
+        if (trainingPlan.OwnerUid != decodedToken.Uid)
+            throw new ApplicationException("Owner of the token does not match the owner of the training plan");
+        ;
 
         //calculate dates
         var startDate = GetNearestWeekday(request.StartDate);
@@ -59,20 +62,35 @@ public class WorkoutProgramService : IWorkoutProgramService
         //return result
 
 
-        return "labas";
+        return GenericResponse<NewWorkoutProgramResponse>.SuccessResponse(new NewWorkoutProgramResponse
+        {
+            WorkoutId = workoutProgram.Id
+        });
     }
 
-    public async Task<string> DeleteProgram(DeleteProgramRequest request, int id)
+    public async Task<GenericResponse<string>> DeleteProgram(DeleteProgramRequest request, int id)
     {
         var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.token);
 
         var workoutProgram = await _workoutRepository.GetById(id);
 
-        if (workoutProgram.TrainingPlan.OwnerUid != decodedToken.Uid) return "error";
+        if (workoutProgram.TrainingPlan.OwnerUid != decodedToken.Uid)
+            throw new ApplicationException("Owner of the program does not match the one in the token");
+        ;
         _workoutRepository.RemoveWorkoutProgram(workoutProgram);
         await _unitOfWork.CompleteAsync();
 
-        return "successfully deleted";
+        return GenericResponse<string>.SuccessResponse($"Program with ID {id} successfully deleted");
+    }
+
+    public async Task<GenericResponse<WorkoutProgramSummaryResponse>> GetSummaryById(WorkoutProgramRequest request)
+    {
+        var program = await _workoutRepository.GetSummaryById(request.Id);
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.Token);
+
+        if (program == null || program.OwnerUID != decodedToken.Uid)
+            throw new ApplicationException("Owner of the program does not match the one in the token");
+        return GenericResponse<WorkoutProgramSummaryResponse>.SuccessResponse(program);
     }
 
     private DateTime GetNearestWeekday(DateTime date)
@@ -138,6 +156,8 @@ public class WorkoutProgramService : IWorkoutProgramService
         Workout? lastworkout)
     {
         var workoutSets = new List<WorkoutSet>();
+        
+
 
         foreach (var exercise in exercises)
         {
