@@ -67,7 +67,12 @@ public class ExceptionHandlingMiddleware
         }
 
         _logger.LogError(exception.Message);
-        var result = JsonSerializer.Serialize(errorResponse);
+        var serializeOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+        var result = JsonSerializer.Serialize(errorResponse, serializeOptions);
         await context.Response.WriteAsync(result);
     }
 }

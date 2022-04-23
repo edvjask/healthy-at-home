@@ -1,6 +1,7 @@
 ﻿using HealthyAtHomeAPI.Interfaces;
 using HealthyAtHomeAPI.Models;
 using HealthyAtHomeAPI.Repository;
+using HealthyAtHomeAPI.Services.Communication;
 
 namespace HealthyAtHomeAPI.Services;
 
@@ -13,8 +14,9 @@ public class ExerciseService : IExerciseService
         _exerciseRepository = exerciseRepository;
     }
 
-    public async Task<List<Exercise>> GetAllExercises()
+    public async Task<GenericResponse<List<Exercise>>> GetAllExercises()
     {
-        return await _exerciseRepository.GetAll();
+        var exercises = await _exerciseRepository.GetAll();
+        return GenericResponse<List<Exercise>>.SuccessResponse(exercises);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using FirebaseAdmin.Auth;
+using HealthyAtHomeAPI.DTOs.exercise_cue;
+using HealthyAtHomeAPI.DTOs.workout;
 using HealthyAtHomeAPI.DTOs.workout_program;
 using HealthyAtHomeAPI.Enumerators;
 using HealthyAtHomeAPI.Interfaces;
@@ -36,12 +38,14 @@ public class WorkoutProgramService : IWorkoutProgramService
     {
         //verify token and plan ownership
         var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.UserToken);
-
         var trainingPlan = await _trainingPlanRepository.GetById(request.TrainingPlanId);
 
         if (trainingPlan.OwnerUid != decodedToken.Uid)
             throw new ApplicationException("Owner of the token does not match the owner of the training plan");
-        ;
+
+        //verify that program for this plan doesn't exist and if it does, delete it
+        var existingProgram = await _workoutRepository.GetWorkoutProgramByTrainingPlanId(trainingPlan.Id);
+        if (existingProgram != null) _workoutRepository.RemoveWorkoutProgram(existingProgram);
 
         //calculate dates
         var startDate = GetNearestWeekday(request.StartDate);
@@ -83,6 +87,13 @@ public class WorkoutProgramService : IWorkoutProgramService
         return GenericResponse<string>.SuccessResponse($"Program with ID {id} successfully deleted");
     }
 
+    public async Task<GenericResponse<WorkoutProgram>> GetProgramByTrainingPlanId(int id)
+    {
+        var program = await _workoutRepository.GetWorkoutProgramByTrainingPlanId(id);
+
+        return GenericResponse<WorkoutProgram>.SuccessResponse(program);
+    }
+
     public async Task<GenericResponse<WorkoutProgramSummaryResponse>> GetSummaryById(WorkoutProgramRequest request)
     {
         var program = await _workoutRepository.GetSummaryById(request.Id);
@@ -92,6 +103,84 @@ public class WorkoutProgramService : IWorkoutProgramService
             throw new ApplicationException("Owner of the program does not match the one in the token");
         return GenericResponse<WorkoutProgramSummaryResponse>.SuccessResponse(program);
     }
+
+    public async Task<GenericResponse<List<GetWorkoutProgram>>> GetWorkoutProgramsForUser(string token)
+    {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        var programs = await _workoutRepository.GetWorkoutProgramsForUser(decodedToken.Uid);
+        return GenericResponse<List<GetWorkoutProgram>>.SuccessResponse(programs);
+    }
+
+    public async Task<GenericResponse<GetWorkoutInfo>> GetWorkoutInfoById(WorkoutInfoRequest request)
+    {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.Token);
+        var workout = await _workoutRepository.GetWorkoutInfo(request.Id, decodedToken.Uid);
+
+        if (workout == null) throw new ApplicationException("Workout for this user does not exist");
+
+        var workoutExerciseGroups = workout.WorkoutSets.GroupBy(ws => ws.Exercise.Name);
+        var exerciseSets = new List<ExerciseWithSets>();
+        foreach (var group in workoutExerciseGroups)
+        {
+            var exercise = group.First().Exercise;
+
+            var cues = exercise.ExerciseCues.Select(ec => new GetExerciseCue
+            {
+                Instructions = ec.Description,
+                CueType = ec.CueType
+            }).ToList();
+
+            exerciseSets.Add(new ExerciseWithSets
+            {
+                Id = exercise.Id,
+                Name = group.Key,
+                ExerciseCues = cues,
+                ExerciseSets = group.Select(es => new GetWorkoutSet
+                {
+                    Id = es.Id,
+                    OrderNo = es.OrderNr,
+                    RepsCompleted = es.RepsCompleted,
+                    RepsToComplete = es.RepsToComplete
+                }).ToList()
+            });
+        }
+
+        return GenericResponse<GetWorkoutInfo>.SuccessResponse(new GetWorkoutInfo
+        {
+            Id = workout.Id,
+            RestPeriodMs = workout.RestAmountMs,
+            Completed = workout.Completed,
+            OrderNr = workout.OrderNr,
+            ExercisesWithSets = exerciseSets
+        });
+    }
+
+    public async Task<GenericResponse<SaveResultsResponse>> SaveWorkoutResults(SaveResultsRequest request)
+    {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.Token);
+        var workout = await _workoutRepository.GetWorkoutByIdWithSets(request.WorkoutId, decodedToken.Uid);
+
+        if (workout == null) throw new ApplicationException("Workout for this user does not exist");
+
+        request.SetsResults.ForEach(result =>
+        {
+            var itemToChange = workout.WorkoutSets.First(ws => ws.Id == result.Id).RepsCompleted = result.RepsCompleted;
+        });
+
+        //update other fields
+        workout.Completed = true;
+        workout.TimeElapsedMs = request.TimeElapsedMs;
+
+        _workoutRepository.SaveWorkoutResults(workout);
+        await _unitOfWork.CompleteAsync();
+
+
+        return GenericResponse<SaveResultsResponse>.SuccessResponse(new SaveResultsResponse
+        {
+            ResultsSavedCount = request.SetsResults.Count
+        });
+    }
+
 
     private DateTime GetNearestWeekday(DateTime date)
     {
@@ -122,6 +211,12 @@ public class WorkoutProgramService : IWorkoutProgramService
 
         var workoutsUsed = 0;
         var workoutNr = 1;
+        var restPeriodMs = workoutGoal switch
+        {
+            EWorkoutGoal.Endurance => 60 * 1000,
+            EWorkoutGoal.Strength => 120 * 1000,
+            _ => 90 * 1000
+        };
         var exerciseIdSetToIncrease = new Dictionary<int, int>();
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
@@ -137,6 +232,7 @@ public class WorkoutProgramService : IWorkoutProgramService
                 var workout = new Workout
                 {
                     Date = date,
+                    RestAmountMs = restPeriodMs,
                     OrderNr = workoutNr,
                     WorkoutSets = GenerateWorkoutSets(trainingPlan.Exercises, exerciseIdSetToIncrease,
                         noOfSets, noOfMaxReps, workouts.Count > 0 ? workouts.Last() : null)

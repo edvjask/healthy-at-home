@@ -1,5 +1,4 @@
 ﻿using HealthyAtHomeAPI.Interfaces;
-using HealthyAtHomeAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthyAtHomeAPI.Controllers;
@@ -16,8 +15,8 @@ public class ExerciseController : Controller
     }
 
     [HttpGet("all")]
-    public async Task<List<Exercise>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        return await _exerciseService.GetAllExercises();
+        return Ok(await _exerciseService.GetAllExercises());
     }
 }

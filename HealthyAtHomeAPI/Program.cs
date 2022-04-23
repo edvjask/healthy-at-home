@@ -1,5 +1,7 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using HealthyAtHomeAPI.Interfaces;
 using HealthyAtHomeAPI.Middlewares;
@@ -50,12 +52,23 @@ builder.Services.AddCors(options =>
 });
 
 //Configure Firebase auth
+var cur = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+var dir = @"..\..\..\..\";
+var fileLocation = @".secrets\healthyathome-service-key.json";
+var newPath = Path.GetFullPath(Path.Combine(cur, dir));
 
 FirebaseApp.Create(new AppOptions
 {
     Credential =
-        GoogleCredential.FromFile(@"D:\Projects\Bakalaurinis\HealthyAtHomeAPI\.secrets\healthyathome-service-key.json")
+        GoogleCredential.FromFile(newPath + fileLocation)
 });
+
+var claims = new Dictionary<string, object>
+{
+    {"admin", true}
+};
+const string adminUid = "kLnRV9UqUsWYA8QDJuefu4pqLiF3";
+await FirebaseAuth.DefaultInstance.SetCustomUserClaimsAsync(adminUid, claims);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -98,6 +111,8 @@ app.UseAuthentication();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

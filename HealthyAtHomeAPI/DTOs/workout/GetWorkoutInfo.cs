@@ -1,11 +1,14 @@
 ﻿namespace HealthyAtHomeAPI.DTOs.workout;
 
-public class WorkoutSummary
+public class GetWorkoutInfo
 {
     public int Id { get; set; }
+
     public int OrderNr { get; set; }
 
-    public DateTime Date { get; set; }
+    public int RestPeriodMs { get; set; }
 
     public bool Completed { get; set; }
+
+    public List<ExerciseWithSets> ExercisesWithSets { get; set; } = new();
 }
