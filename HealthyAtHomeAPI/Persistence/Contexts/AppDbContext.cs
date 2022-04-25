@@ -85,11 +85,13 @@ public class AppDbContext : DbContext
                 Instructions =
                     "Pull body up until chin is above bar. Lower body until arms and shoulders are fully extended. Repeat.",
                 Name = "Pull Up",
-                ExerciseCues = null,
-                ExerciseDifficulty = ELevelsOfDifficulty.Novice,
+                ExerciseDifficulty = ELevelsOfDifficulty.Intermediate,
                 ExerciseType = EExerciseType.VerticalPull,
+                YoutubeLink = "https://www.youtube.com/embed/eGo4IYlbE5g",
                 InventoryTypes = new List<EInventoryType> {EInventoryType.PullupBar},
-                MuscleGroups = new List<EMuscleGroup> {EMuscleGroup.Arms, EMuscleGroup.Back}
+                MuscleGroups = new List<EMuscleGroup> {EMuscleGroup.Arms, EMuscleGroup.Back},
+                HarderVariationId = 11,
+                EasierVariationId = 10
             },
             exerciseBuilder
                 .Reset()
@@ -181,6 +183,36 @@ public class AppDbContext : DbContext
                 .AddType(EExerciseType.Legs)
                 .AddMuscleGroup(EMuscleGroup.Legs)
                 .AddYoutubeLink("https://www.youtube.com/embed/gsNoPYwWXeM")
+                .Build(),
+            exerciseBuilder
+                .Reset()
+                .AddId(10)
+                .AddInstruction(
+                    "Jump to the top of the pull-up position, then slowly (as slowly as you can), lower yourself until your arms are straight.")
+                .AddName("Pull Up Negatives")
+                .AddDifficulty(ELevelsOfDifficulty.Novice)
+                .AddType(EExerciseType.VerticalPull)
+                .AddMuscleGroup(EMuscleGroup.Back)
+                .AddMuscleGroup(EMuscleGroup.Arms)
+                .AddInventoryType(EInventoryType.PullupBar)
+                .AddInventoryType(EInventoryType.GymnasticRings)
+                .AddHarderVariationId(2)
+                .AddYoutubeLink("https://www.youtube.com/embed/Y3ntNsIS2Q8")
+                .Build(),
+            exerciseBuilder
+                .Reset()
+                .AddId(11)
+                .AddInstruction(
+                    "Hold your legs in an L-sit position, perform a pull-up.")
+                .AddName("L-Sit Pull Up")
+                .AddDifficulty(ELevelsOfDifficulty.Advanced)
+                .AddType(EExerciseType.VerticalPull)
+                .AddMuscleGroup(EMuscleGroup.Back)
+                .AddMuscleGroup(EMuscleGroup.Arms)
+                .AddInventoryType(EInventoryType.PullupBar)
+                .AddInventoryType(EInventoryType.GymnasticRings)
+                .AddYoutubeLink("https://www.youtube.com/embed/sbIxXuOI8D4")
+                .AddEasierVariationId(2)
                 .Build()
         );
         builder.Entity<ExerciseCue>().HasData(
@@ -197,7 +229,36 @@ public class AppDbContext : DbContext
                 CueType = ECueType.Do,
                 ExerciseId = 8,
                 Description = "Keep your legs straight"
+            },
+            new ExerciseCue
+            {
+                Id = 3,
+                CueType = ECueType.Do,
+                ExerciseId = 2,
+                Description = "Focus on contracting your back"
+            },
+            new ExerciseCue
+            {
+                Id = 4,
+                CueType = ECueType.Do,
+                ExerciseId = 2,
+                Description = "Keep a hollow body"
+            },
+            new ExerciseCue
+            {
+                Id = 5,
+                CueType = ECueType.Dont,
+                ExerciseId = 2,
+                Description = "Don't use momentum"
+            },
+            new ExerciseCue
+            {
+                Id = 6,
+                CueType = ECueType.Dont,
+                ExerciseId = 2,
+                Description = "Keep your arms bent at the bottom"
             }
+            
         );
 
     }

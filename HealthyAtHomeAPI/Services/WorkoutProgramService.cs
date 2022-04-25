@@ -181,6 +181,55 @@ public class WorkoutProgramService : IWorkoutProgramService
         });
     }
 
+    public async Task<GenericResponse<WorkoutMetricsResponse>> GetWorkoutMetrics(string token, int workoutId)
+    {
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        var workout = await _workoutRepository.GetProgramByIdWithWorkouts(workoutId, decodedToken.Uid);
+
+        if (workout == null) throw new ApplicationException("Workout program for this user does not exist");
+
+        var dateNow = DateTime.Today;
+
+        var missedCount = workout.Workouts.Where(w => w.Date.Date < dateNow.Date && !w.Completed).ToList().Count;
+        var totalTime = workout.Workouts.Where(w => w.Completed).Sum(w => w.TimeElapsedMs);
+
+        var totalsForWorkouts = GetWorkoutsTotals(workout.Workouts.ToList());
+
+        var metrics = new WorkoutMetricsResponse
+        {
+            missedWorkoutsCount = missedCount,
+            totalWorkoutTimeMs = totalTime,
+            WorkoutTotalsList = totalsForWorkouts
+        };
+
+        return GenericResponse<WorkoutMetricsResponse>.SuccessResponse(metrics);
+    }
+
+    private List<GetWorkoutTotals> GetWorkoutsTotals(List<Workout> workouts)
+    {
+        var totals = new List<GetWorkoutTotals>();
+
+        workouts.ForEach(workout =>
+        {
+            //calculate totals
+            var totalToComplete = workout.WorkoutSets.Sum(ws => ws.RepsToComplete);
+            var totalCompleted = workout.Completed
+                ? workout.WorkoutSets
+                    .Where(ws => ws.RepsCompleted != -1)
+                    .Sum(ws => ws.RepsCompleted)
+                : 0;
+
+            totals.Add(
+                new GetWorkoutTotals
+                {
+                    Date = workout.Date,
+                    Id = workout.Id,
+                    RepsTotalCompleted = totalCompleted,
+                    RepsTotalToComplete = totalToComplete
+                });
+        });
+        return totals;
+    }
 
     private DateTime GetNearestWeekday(DateTime date)
     {

@@ -30,6 +30,16 @@ public class WorkoutRepository : BaseRepository, IWorkoutRepository
             .FirstAsync(wp => wp.Id == id);
     }
 
+    public async Task<WorkoutProgram> GetProgramByIdWithWorkouts(int id, string uid)
+    {
+        return await _context.WorkoutPrograms
+            .Where(wp => wp.Id == id && wp.TrainingPlan.OwnerUid == uid)
+            .Include(wp => wp.Workouts)
+            .ThenInclude(w => w.WorkoutSets)
+            .AsSplitQuery()
+            .FirstAsync();
+    }
+
     public async Task<WorkoutProgramSummaryResponse?> GetSummaryById(int id)
     {
         return await _context.WorkoutPrograms

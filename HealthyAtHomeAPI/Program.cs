@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
@@ -52,15 +51,16 @@ builder.Services.AddCors(options =>
 });
 
 //Configure Firebase auth
-var cur = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-var dir = @"..\..\..\..\";
-var fileLocation = @".secrets\healthyathome-service-key.json";
-var newPath = Path.GetFullPath(Path.Combine(cur, dir));
+// var cur = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+// var dir = @"..\..\..\..\";
+// var fileLocation = @".secrets\healthyathome-service-key.json";
+// var newPath = Path.GetFullPath(Path.Combine(cur, dir));
+var location = @"D:\Projects\Bakalaurinis\HealthyAtHomeAPI\.secrets\healthyathome-service-key.json";
 
 FirebaseApp.Create(new AppOptions
 {
     Credential =
-        GoogleCredential.FromFile(newPath + fileLocation)
+        GoogleCredential.FromFile(location)
 });
 
 var claims = new Dictionary<string, object>

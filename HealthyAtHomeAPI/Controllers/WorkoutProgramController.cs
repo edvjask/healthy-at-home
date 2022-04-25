@@ -58,6 +58,12 @@ public class WorkoutProgramController : Controller
     {
         return Ok(await _workoutProgramService.SaveWorkoutResults(request));
     }
-    
-    
+
+    [HttpPost("{id}/metrics")]
+    public async Task<IActionResult> GetProgramMetrics([FromBody] RequestTokenBody request, int id)
+    {
+        return Ok(await _workoutProgramService.GetWorkoutMetrics(request.Token, id));
+    }
+
+
 }

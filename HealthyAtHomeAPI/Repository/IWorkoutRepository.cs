@@ -11,6 +11,8 @@ public interface IWorkoutRepository
 
     Task<WorkoutProgram> GetById(int id);
 
+    Task<WorkoutProgram> GetProgramByIdWithWorkouts(int id, string uid);
+
     Task<WorkoutProgramSummaryResponse?> GetSummaryById(int id);
 
     Task<WorkoutProgram?> GetWorkoutProgramByTrainingPlanId(int id);
