@@ -41,6 +41,7 @@ public class ExceptionHandlingMiddleware
         switch (exception)
         {
             case FirebaseAuthException ex:
+            case UnauthorizedAccessException:
                 response.StatusCode = (int) HttpStatusCode.Unauthorized;
                 errorResponse.Message = "Failed to verify Firebase token";
                 break;
@@ -52,7 +53,6 @@ public class ExceptionHandlingMiddleware
                     errorResponse.Message = ex.Message;
                     break;
                 }
-
                 response.StatusCode = (int) HttpStatusCode.BadRequest;
                 errorResponse.Message = ex.Message;
                 break;
@@ -66,7 +66,7 @@ public class ExceptionHandlingMiddleware
                 break;
         }
 
-        _logger.LogError(exception.Message);
+        _logger.LogError(exception.ToString());
         var serializeOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

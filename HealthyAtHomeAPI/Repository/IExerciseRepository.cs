@@ -12,5 +12,11 @@ public interface IExerciseRepository
 
     public Task<ExerciseInfoResponse?> GetDetailsById(int id);
 
+    public Task<Exercise?> GetById(int id);
+
     public Task<List<GetWorkoutResultSet>> GetResultsForLastNWorkouts(int id, string uid, int lastCount);
+
+    public Task AddNew(Exercise exercise);
+
+    public void Update(Exercise exercise);
 }

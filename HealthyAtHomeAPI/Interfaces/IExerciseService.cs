@@ -13,4 +13,8 @@ public interface IExerciseService
     Task<GenericResponse<ExerciseInfoResponse>> GetInfoById(int id);
 
     Task<GenericResponse<List<GetWorkoutResultSet>>> GetResultsForUser(RequestTokenBody request, int id);
+
+    Task<GenericResponse<Exercise>> AddNewExercise(AddExerciseRequest request);
+
+    Task<GenericResponse<bool>> AddGif(IFormFile file, int id);
 }

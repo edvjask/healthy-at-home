@@ -1,4 +1,5 @@
 ﻿using HealthyAtHomeAPI.DTOs;
+using HealthyAtHomeAPI.DTOs.exercise;
 using HealthyAtHomeAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,5 +32,17 @@ public class ExerciseController : Controller
     public async Task<IActionResult> GetExerciseResults([FromBody] RequestTokenBody request, int id)
     {
         return Ok(await _exerciseService.GetResultsForUser(request, id));
+    }
+
+    [HttpPost("add-new")]
+    public async Task<IActionResult> AddNewExercise([FromBody] AddExerciseRequest request)
+    {
+        return Ok(await _exerciseService.AddNewExercise(request));
+    }
+
+    [HttpPost("add-picture/{id}")]
+    public async Task<IActionResult> AddPhoto(IFormFile file, int id)
+    {
+        return Ok(await _exerciseService.AddGif(file, id));
     }
 }

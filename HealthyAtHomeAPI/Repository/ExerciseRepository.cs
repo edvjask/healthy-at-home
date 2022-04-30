@@ -63,6 +63,13 @@ public class ExerciseRepository : BaseRepository, IExerciseRepository
         return exercise;
     }
 
+    public async Task<Exercise?> GetById(int id)
+    {
+        return await _context.Exercises
+            .Where(e => e.Id == id)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<List<GetWorkoutResultSet>> GetResultsForLastNWorkouts(int id, string uid, int lastCount)
     {
         //last 3 workouts with exercise id;
@@ -95,5 +102,15 @@ public class ExerciseRepository : BaseRepository, IExerciseRepository
                 RepsToComplete = ws.RepsToComplete
             })
             .ToListAsync();
+    }
+
+    public async Task AddNew(Exercise exercise)
+    {
+        await _context.Exercises.AddAsync(exercise);
+    }
+
+    public void Update(Exercise exercise)
+    {
+        _context.Exercises.Update(exercise);
     }
 }
