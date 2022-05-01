@@ -65,5 +65,11 @@ public class WorkoutProgramController : Controller
         return Ok(await _workoutProgramService.GetWorkoutMetrics(request.Token, id));
     }
 
+    [HttpPatch("edit-workout/{id}")]
+    public async Task<IActionResult> EditWorkout([FromBody] EditWorkoutRequest request, int id)
+    {
+        return Ok(await _workoutProgramService.EditWorkout(request, id));
+    }
+
 
 }

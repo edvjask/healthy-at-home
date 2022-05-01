@@ -109,4 +109,17 @@ public class WorkoutRepository : BaseRepository, IWorkoutRepository
     {
         _context.Workouts.Update(updatedWorkout);
     }
+
+    public void EditWorkoutSets(List<EditWorkoutSet> workoutSets, Workout workout)
+    {
+        workoutSets.ForEach(set =>
+        {
+            var oldSet = workout.WorkoutSets.First(old => old.Id == set.Id);
+
+            oldSet.RepsCompleted = set.RepsCompleted ?? oldSet.RepsCompleted;
+            oldSet.RepsToComplete = set.RepsToComplete ?? oldSet.RepsToComplete;
+        });
+
+        _context.Workouts.Update(workout);
+    }
 }

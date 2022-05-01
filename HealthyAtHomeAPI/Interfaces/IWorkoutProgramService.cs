@@ -22,4 +22,6 @@ public interface IWorkoutProgramService
     Task<GenericResponse<WorkoutMetricsResponse>> GetWorkoutMetrics(string token, int workoutId);
 
     Task<GenericResponse<SaveResultsResponse>> SaveWorkoutResults(SaveResultsRequest request);
+
+    Task<GenericResponse<Workout>> EditWorkout(EditWorkoutRequest request, int id);
 }

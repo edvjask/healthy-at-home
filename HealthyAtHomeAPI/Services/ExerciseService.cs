@@ -60,8 +60,6 @@ public class ExerciseService : IExerciseService
         var isAdmin = await FirebaseHelper.IsUserAdmin(request.Token);
         if (!isAdmin) throw new UnauthorizedAccessException("Insufficient permissions for this action.");
 
-        ValidateAndUpdateVariations(request.AddExerciseDto);
-
         var newExercise = _mapper.Map<AddExerciseDto, Exercise>(request.AddExerciseDto);
         var cues = request.AddExerciseDto.ExerciseCues
             .Select(cue => _mapper.Map<AddExerciseCue, ExerciseCue>(cue))
@@ -70,6 +68,9 @@ public class ExerciseService : IExerciseService
         newExercise.ExerciseCues = cues;
 
         await _exerciseRepository.AddNew(newExercise);
+        await _unitOfWork.CompleteAsync();
+
+        await ValidateAndUpdateVariations(request.AddExerciseDto, newExercise.Id);
         await _unitOfWork.CompleteAsync();
 
         return GenericResponse<Exercise>.SuccessResponse(newExercise);
@@ -107,7 +108,7 @@ public class ExerciseService : IExerciseService
         return GenericResponse<bool>.SuccessResponse(true);
     }
 
-    private async void ValidateAndUpdateVariations(AddExerciseDto addExerciseDto)
+    private async Task ValidateAndUpdateVariations(AddExerciseDto addExerciseDto, int newId)
     {
         var easierId = addExerciseDto.EasierVariationId;
         if (easierId.HasValue)
@@ -117,7 +118,7 @@ public class ExerciseService : IExerciseService
             {
                 if (exercise.HarderVariationId.HasValue)
                     throw new ApplicationException("Easier variation cannot be set");
-                exercise.HarderVariationId = easierId;
+                exercise.HarderVariationId = newId;
                 _exerciseRepository.Update(exercise);
             }
         }
@@ -130,12 +131,12 @@ public class ExerciseService : IExerciseService
             {
                 if (exercise.EasierVariationId.HasValue)
                     throw new ApplicationException("Harder variation cannot be set");
-                exercise.EasierVariationId = harderId;
+                exercise.EasierVariationId = newId;
                 _exerciseRepository.Update(exercise);
             }
         }
 
-        //await _unitOfWork.CompleteAsync();
+        
     }
 
     private string? GetAuthToken()

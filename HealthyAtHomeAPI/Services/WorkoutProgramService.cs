@@ -18,19 +18,22 @@ public class WorkoutProgramService : IWorkoutProgramService
     private readonly IWorkoutRepository _workoutRepository;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private static int NO_OF_MUSCLE_GROUPS = 6;
 
     public WorkoutProgramService(ITrainingPlanRepository trainingPlanRepository,
         IExerciseRepository exerciseRepository,
         IMapper mapper,
         IUnitOfWork unitOfWork,
-        IWorkoutRepository workoutRepository)
+        IWorkoutRepository workoutRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
         _trainingPlanRepository = trainingPlanRepository;
         _exerciseRepository = exerciseRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _workoutRepository = workoutRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
 
@@ -179,6 +182,19 @@ public class WorkoutProgramService : IWorkoutProgramService
         {
             ResultsSavedCount = request.SetsResults.Count
         });
+    }
+
+    public async Task<GenericResponse<Workout>> EditWorkout(EditWorkoutRequest request, int id)
+    {
+        var uid = await GetUserUid();
+        var workout = await _workoutRepository.GetWorkoutByIdWithSets(id, uid);
+        if (workout is null)
+            throw new AggregateException("Workout for this user doesn't exist");
+
+        _workoutRepository.EditWorkoutSets(request.EditWorkoutSets, workout);
+        await _unitOfWork.CompleteAsync();
+
+        return GenericResponse<Workout>.SuccessResponse(workout);
     }
 
     public async Task<GenericResponse<WorkoutMetricsResponse>> GetWorkoutMetrics(string token, int workoutId)
@@ -338,5 +354,19 @@ public class WorkoutProgramService : IWorkoutProgramService
         }
 
         return workoutSets;
+    }
+
+    private string? GetAuthToken()
+    {
+        return _httpContextAccessor.HttpContext.Request.Headers["Authorization"]
+            .ToString().Substring(7);
+    }
+
+    private async Task<string> GetUserUid()
+    {
+        var token = GetAuthToken();
+        if (token is null) throw new UnauthorizedAccessException();
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        return decodedToken.Uid;
     }
 }

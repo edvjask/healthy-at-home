@@ -1,4 +1,5 @@
-﻿using HealthyAtHomeAPI.DTOs.workout_program;
+﻿using HealthyAtHomeAPI.DTOs.workout;
+using HealthyAtHomeAPI.DTOs.workout_program;
 using HealthyAtHomeAPI.Models;
 
 namespace HealthyAtHomeAPI.Repository;
@@ -24,4 +25,6 @@ public interface IWorkoutRepository
     Task<Workout?> GetWorkoutByIdWithSets(int id, string uid);
 
     void SaveWorkoutResults(Workout workout);
+
+    void EditWorkoutSets(List<EditWorkoutSet> workoutSets, Workout workout);
 }
