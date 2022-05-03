@@ -54,12 +54,13 @@ builder.Services.AddCors(options =>
 // var dir = @"..\..\..\..\";
 // var fileLocation = @".secrets\healthyathome-service-key.json";
 // var newPath = Path.GetFullPath(Path.Combine(cur, dir));
-var location = @"D:\Projects\Bakalaurinis\HealthyAtHomeAPI\.secrets\healthyathome-service-key.json";
+var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), ".secrets", "healthyathome-service-key.json");
+//var location = @"D:\Projects\Bakalaurinis\HealthyAtHomeAPI\.secrets\healthyathome-service-key.json";
 
 FirebaseApp.Create(new AppOptions
 {
     Credential =
-        GoogleCredential.FromFile(location)
+        GoogleCredential.FromFile(pathToKey)
 });
 
 var claims = new Dictionary<string, object>

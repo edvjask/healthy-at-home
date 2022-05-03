@@ -112,6 +112,7 @@ public class WorkoutRepository : BaseRepository, IWorkoutRepository
 
     public void EditWorkoutSets(List<EditWorkoutSet> workoutSets, Workout workout)
     {
+        var anyCompletedResults = workoutSets.Exists(set => set.RepsCompleted != -1);
         workoutSets.ForEach(set =>
         {
             var oldSet = workout.WorkoutSets.First(old => old.Id == set.Id);
@@ -119,6 +120,8 @@ public class WorkoutRepository : BaseRepository, IWorkoutRepository
             oldSet.RepsCompleted = set.RepsCompleted ?? oldSet.RepsCompleted;
             oldSet.RepsToComplete = set.RepsToComplete ?? oldSet.RepsToComplete;
         });
+
+        if (anyCompletedResults) workout.Completed = true;
 
         _context.Workouts.Update(workout);
     }
