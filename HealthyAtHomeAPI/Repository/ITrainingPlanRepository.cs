@@ -8,4 +8,6 @@ public interface ITrainingPlanRepository
     Task<List<TrainingPlan>> GetAllForUser(string uid);
 
     Task<TrainingPlan> GetById(int id);
+
+    void EditPlan(TrainingPlan plan);
 }

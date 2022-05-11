@@ -6,6 +6,7 @@ using HealthyAtHomeAPI.Helpers;
 using HealthyAtHomeAPI.Interfaces;
 using HealthyAtHomeAPI.Models;
 using HealthyAtHomeAPI.Repository;
+using HealthyAtHomeAPI.Services.Communication;
 
 namespace HealthyAtHomeAPI.Services;
 
@@ -16,14 +17,16 @@ public class TrainingPlanService : ITrainingPlanService
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private const int NUMBER_OF_MUSCLE_GROUPS = 6;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public TrainingPlanService(ITrainingPlanRepository trainingPlanRepository, IExerciseRepository exerciseRepository,
-        IMapper mapper, IUnitOfWork unitOfWork)
+        IMapper mapper, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
         _trainingPlanRepository = trainingPlanRepository;
         _exerciseRepository = exerciseRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<List<TrainingPlanAlternativesGroup>> GenerateAlternativesAsync(
@@ -71,6 +74,23 @@ public class TrainingPlanService : ITrainingPlanService
         var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
         return await _trainingPlanRepository.GetAllForUser(decodedToken.Uid);
+    }
+
+    public async Task<GenericResponse<TrainingPlan>> EditPlanExercises(EditPlanRequest request)
+    {
+        var trainingPlan = await _trainingPlanRepository.GetById(request.Id);
+        var uid = await GetUserUid();
+
+        if (trainingPlan.OwnerUid != uid) throw new ApplicationException("Training Plan for this user doesn't exist");
+
+        var newExercises = await _exerciseRepository.GetByIds(request.ExerciseIds);
+
+        trainingPlan.Exercises = newExercises;
+
+        _trainingPlanRepository.EditPlan(trainingPlan);
+        await _unitOfWork.CompleteAsync();
+
+        return GenericResponse<TrainingPlan>.SuccessResponse(trainingPlan);
     }
 
     private List<TrainingPlanAlternativesGroup> GetExercises(NewTrainingPlanRequestDto trainingPlanOptions,
@@ -134,6 +154,27 @@ public class TrainingPlanService : ITrainingPlanService
                     Exercises = group.ToList(), CategoryType = TrainingPlanHelpers.SplitCamelCase(group.Key),
                     AlternativesToChoose = Math.Min(exercisesToSelect, group.ToList().Count)
                 }));
+    }
+
+    private string? GetAuthToken()
+    {
+        try
+        {
+            return _httpContextAccessor.HttpContext.Request.Headers["Authorization"]
+                .ToString().Substring(7);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return null;
+        }
+    }
+
+    private async Task<string> GetUserUid()
+    {
+        var token = GetAuthToken();
+        if (token is null) throw new UnauthorizedAccessException();
+        var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+        return decodedToken.Uid;
     }
     
     

@@ -297,14 +297,14 @@ public class AppDbContext : DbContext
             new ExerciseCue
             {
                 Id = 555,
-                CueType = ECueType.Dont,
+                CueType = ECueType.Do,
                 ExerciseId = 1,
                 Description = "Keep a hollow body"
             },
             new ExerciseCue
             {
                 Id = 556,
-                CueType = ECueType.Do,
+                CueType = ECueType.Dont,
                 ExerciseId = 1,
                 Description = "Arch your lower back"
             },

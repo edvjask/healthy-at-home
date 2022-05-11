@@ -27,6 +27,12 @@ public class TrainingPlanController : Controller
         return Ok(await _trainingPlanService.SaveTrainingPlanAsync(trainingPlanWithOptions));
     }
 
+    [HttpPatch("{id}/edit-exercises")]
+    public async Task<IActionResult> EditPlanExercises([FromBody] EditPlanRequest request)
+    {
+        return Ok(await _trainingPlanService.EditPlanExercises(request));
+    }
+
     [HttpPost("get-all")]
     public async Task<IActionResult> GetAll([FromBody] GetPlansRequest request)
     {

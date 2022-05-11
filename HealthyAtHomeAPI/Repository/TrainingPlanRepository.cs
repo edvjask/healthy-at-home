@@ -33,5 +33,10 @@ public class TrainingPlanRepository : BaseRepository, ITrainingPlanRepository
             .Include(t => t.Exercises)
             .Where(t => t.Id == id)
             .FirstAsync();
-    } 
+    }
+
+    public void EditPlan(TrainingPlan plan)
+    {
+        _context.TrainingPlans.Update(plan);
+    }
 }

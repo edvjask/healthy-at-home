@@ -69,6 +69,11 @@ var claims = new Dictionary<string, object>
 };
 const string adminUid = "kLnRV9UqUsWYA8QDJuefu4pqLiF3";
 await FirebaseAuth.DefaultInstance.SetCustomUserClaimsAsync(adminUid, claims);
+await FirebaseAuth.DefaultInstance.UpdateUserAsync(new UserRecordArgs
+{
+    Uid = adminUid,
+    EmailVerified = true
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
