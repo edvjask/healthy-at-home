@@ -3,6 +3,7 @@ using HealthyAtHomeAPI.Converters;
 using HealthyAtHomeAPI.Enumerators;
 using HealthyAtHomeAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace HealthyAtHomeAPI.Persistence.Contexts;
 
@@ -10,7 +11,7 @@ public class AppDbContext : DbContext
 {
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<TrainingPlan> TrainingPlans { get; set; }
-    public DbSet<TrainingPlanOptions> TrainingPlanOptions { get; set; }
+    public DbSet<TrainingPlanOptions?> TrainingPlanOptions { get; set; }
     public DbSet<ExerciseCue> ExerciseCues { get; set; }
     public DbSet<WorkoutProgram> WorkoutPrograms { get; set; }
     public DbSet<Workout> Workouts { get; set; }
@@ -21,6 +22,11 @@ public class AppDbContext : DbContext
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.ContextInitialized));
+    }
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         var inventoryTypesEnumConverter = new EnumCollectionJsonValueConverter<EInventoryType>();

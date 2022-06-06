@@ -15,7 +15,7 @@ namespace HealthyAtHomeAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Instructions = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Instructions = table.Column<string>(type: "nvarchar(max)", maxLength: 4000, nullable: true),
                     ExerciseDifficulty = table.Column<byte>(type: "tinyint", nullable: false),
                     InventoryTypes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MuscleGroups = table.Column<string>(type: "nvarchar(max)", nullable: false),

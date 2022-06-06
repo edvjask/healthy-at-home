@@ -35,6 +35,14 @@ public class TrainingPlanRepository : BaseRepository, ITrainingPlanRepository
             .FirstAsync();
     }
 
+    public async Task<TrainingPlanOptions?> GetOptionsForUser(string id)
+    {
+        return await _context.TrainingPlanOptions
+            .Include(t => t.TrainingPlan)
+            .OrderByDescending(options => options.TrainingPlan.CreationDate)
+            .FirstOrDefaultAsync(options => options.TrainingPlan.OwnerUid == id);
+    }
+
     public void EditPlan(TrainingPlan plan)
     {
         _context.TrainingPlans.Update(plan);

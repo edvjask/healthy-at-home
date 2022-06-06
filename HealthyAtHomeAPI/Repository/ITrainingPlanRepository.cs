@@ -9,5 +9,7 @@ public interface ITrainingPlanRepository
 
     Task<TrainingPlan> GetById(int id);
 
+    Task<TrainingPlanOptions?> GetOptionsForUser(string token);
+
     void EditPlan(TrainingPlan plan);
 }

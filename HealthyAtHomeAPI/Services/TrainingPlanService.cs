@@ -76,6 +76,26 @@ public class TrainingPlanService : ITrainingPlanService
         return await _trainingPlanRepository.GetAllForUser(decodedToken.Uid);
     }
 
+    public async Task<TrainingPlan> GetById(int id)
+    {
+        var userId = await GetUserUid();
+
+        var plan = await _trainingPlanRepository.GetById(id);
+
+        if (plan is null || plan.OwnerUid != userId) throw new ApplicationException("Training Plan not found.");
+
+        return plan;
+    }
+
+    public async Task<GenericResponse<TrainingPlanOptions?>> GetOptionsForUser()
+    {
+        var userId = await GetUserUid();
+
+        var options = await _trainingPlanRepository.GetOptionsForUser(userId);
+
+        return GenericResponse<TrainingPlanOptions?>.SuccessResponse(options);
+    }
+
     public async Task<GenericResponse<TrainingPlan>> EditPlanExercises(EditPlanRequest request)
     {
         var trainingPlan = await _trainingPlanRepository.GetById(request.Id);

@@ -33,6 +33,18 @@ public class TrainingPlanController : Controller
         return Ok(await _trainingPlanService.EditPlanExercises(request));
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        return Ok(await _trainingPlanService.GetById(id));
+    }
+
+    [HttpGet("general-options")]
+    public async Task<IActionResult> GetTrainingPlanOptions()
+    {
+        return Ok(await _trainingPlanService.GetOptionsForUser());
+    }
+
     [HttpPost("get-all")]
     public async Task<IActionResult> GetAll([FromBody] GetPlansRequest request)
     {

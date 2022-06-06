@@ -9,7 +9,7 @@ public class Exercise
 
     [Required] public string Name { get; set; }
 
-    [MaxLength(200)] public string? Instructions { get; set; }
+    public string? Instructions { get; set; }
 
     public ICollection<ExerciseCue> ExerciseCues { get; set; } = new List<ExerciseCue>();
 
