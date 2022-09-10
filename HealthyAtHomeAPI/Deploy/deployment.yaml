@@ -15,7 +15,6 @@ spec:
       containers:
         - name: healthy-at-home
           image: edvinas.azurecr.io/healthy-at-home-app/healthy-at-home
-          imagePullPolicy: Always
           env:
             - name: DB_HOST
               valueFrom:
@@ -87,11 +86,6 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
-            - name: sdfsdsdfsd
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: FIREBASE_CLIENT_X509_CERT_URL
             - name: FIREBASE_CLIENT_X509_CERT_URL
               valueFrom:
                 secretKeyRef:
