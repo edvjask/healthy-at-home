@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+        
       - name: ACR build
         id: build-push-acr
         uses: azure/acr-build@v1
@@ -22,20 +23,34 @@ jobs:
           image:  healthy-at-home
           branch: master
           tag: ${{ github.sha }}
+          
       - name: Azure login
         id: login
         uses: azure/login@v1.4.3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
       - name: Set AKS context
         id: set-context
         uses: azure/aks-set-context@v3
         with:
           resource-group: '${{ secrets.resource_group }}'
           cluster-name: '${{ secrets.cluster_name }}'
+          
       - name: Setup kubectl
         id: install-kubectl
         uses: azure/setup-kubectl@v3
+        
+      - name: Create ACR secrets
+        uses: Azure/k8s-create-secret@v4
+        with:
+          namespace: 'ingress-basic'
+          secret-name: 'app-cr'
+          container-registry-url: ${{ secrets.registry }}.azurecr.io
+          container-registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+        id: create-secret
+        
       - name: Deploy to AKS
         id: deploy-aks
         uses: Azure/k8s-deploy@v4
@@ -45,4 +60,4 @@ jobs:
             ./HealthyAtHomeAPI/Deploy/deployment.yaml
           images: '${{ secrets.registry }}.azurecr.io/${{ secrets.repository }}/healthy-at-home:${{ github.sha }}'
           imagepullsecrets: |
-            acr-secret
+            app-cr
