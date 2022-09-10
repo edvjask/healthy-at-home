@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: healthy-at-home
-          image: edvinas.azurecr.io/healthy-at-home-app:latest
+          image: edvinas.azurecr.io/healthy-at-home-app/healthy-at-home
           imagePullPolicy: Always
           env:
             - name: DB_HOST
