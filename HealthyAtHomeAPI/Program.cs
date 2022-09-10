@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
+using HealthyAtHomeAPI.Config;
 using HealthyAtHomeAPI.Interfaces;
 using HealthyAtHomeAPI.Middlewares;
 using HealthyAtHomeAPI.Persistence.Contexts;
@@ -13,14 +14,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var env = builder.Environment;
 
 //Add AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 //Add database config
+var connString = env.IsDevelopment()
+    ? builder.Configuration.GetConnectionString("PostgreConnection")
+    : DbConfig.GetConnectionString();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connString));
 
 
 // Add services to the container.
@@ -30,7 +34,6 @@ builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<IWorkoutProgramService, WorkoutProgramService>();
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -43,36 +46,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        builder =>
+        optionsBuilder =>
         {
-            builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
-        });
-});
-
-//Configure Firebase auth
-// var cur = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-// var dir = @"..\..\..\..\";
-// var fileLocation = @".secrets\healthyathome-service-key.json";
-// var newPath = Path.GetFullPath(Path.Combine(cur, dir));
-var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), ".secrets", "healthyathome-service-key.json");
-//var location = @"D:\Projects\Bakalaurinis\HealthyAtHomeAPI\.secrets\healthyathome-service-key.json";
-
-FirebaseApp.Create(new AppOptions
-{
-    Credential =
-        GoogleCredential.FromFile(pathToKey)
-});
-
-var claims = new Dictionary<string, object>
-{
-    {"admin", true}
-};
-const string adminUid = "kLnRV9UqUsWYA8QDJuefu4pqLiF3";
-await FirebaseAuth.DefaultInstance.SetCustomUserClaimsAsync(adminUid, claims);
-await FirebaseAuth.DefaultInstance.UpdateUserAsync(new UserRecordArgs
-{
-    Uid = adminUid,
-    EmailVerified = true
+            if (env.IsDevelopment())
+                optionsBuilder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+        }
+    );
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -94,16 +73,44 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
 var app = builder.Build();
 
+//Firebase config
+var pathToKey = Path.Combine(Directory.GetCurrentDirectory(),
+    ".secrets", "healthyathome-service-key.json");
+
+var firebaseConfig = new FirebaseConfig();
+FirebaseApp.Create(new AppOptions
+{
+    Credential = app.Environment.IsDevelopment()
+        ? GoogleCredential.FromFile(pathToKey)
+        : GoogleCredential.FromJson(firebaseConfig.Serialize())
+});
+
+var claims = new Dictionary<string, object>
+{
+    {"admin", true}
+};
+const string adminUid = "kLnRV9UqUsWYA8QDJuefu4pqLiF3";
+await FirebaseAuth.DefaultInstance.SetCustomUserClaimsAsync(adminUid, claims);
+await FirebaseAuth.DefaultInstance.UpdateUserAsync(new UserRecordArgs
+{
+    Uid = adminUid,
+    EmailVerified = true
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+// migrate any database changes on startup (includes initial db creation)
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dataContext.Database.Migrate();
 }
 
 //cors
@@ -120,6 +127,12 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 app.MapControllers();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapFallbackToController("Index", "Fallback");
+});
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

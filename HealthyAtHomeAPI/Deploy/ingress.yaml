@@ -1,0 +1,23 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: healthy-at-home-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+        - healthy-at-home.me
+      secretName: tls-secret
+  rules:
+    - host: healthy-at-home.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: healthy-at-home
+                port:
+                  number: 80

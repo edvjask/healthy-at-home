@@ -1,0 +1,112 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthy-at-home-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthy-at-home
+  template:
+    metadata:
+      labels:
+        app: healthy-at-home
+    spec:
+      containers:
+        - name: healthy-at-home
+          image: edvinas.azurecr.io/healthy-at-home-app:latest
+          imagePullPolicy: Always
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_USER
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_PASSWORD
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_PORT
+            - name: FIREBASE_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_TYPE
+            - name: FIREBASE_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_PROJECT_ID
+            - name: FIREBASE_PRIVATE_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_PRIVATE_KEY_ID
+            - name: FIREBASE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_PRIVATE_KEY
+            - name: FIREBASE_CLIENT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_CLIENT_EMAIL
+            - name: FIREBASE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_CLIENT_ID
+            - name: FIREBASE_AUTH_URI
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_AUTH_URI
+            - name: FIREBASE_TOKEN_URI
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_TOKEN_URI
+            - name: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
+            - name: sdfsdsdfsd
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_CLIENT_X509_CERT_URL
+            - name: FIREBASE_CLIENT_X509_CERT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: FIREBASE_CLIENT_X509_CERT_URL
+      imagePullSecrets:
+        - name: acr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: healthy-at-home
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+  selector:
+    app: healthy-at-home

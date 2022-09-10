@@ -1,0 +1,12 @@
+.exercise-media {
+    width: 320px;
+    height: 210px;
+}
+
+@media (min-width: 1400px) {
+
+    .exercise-media {
+        width: 540px;
+        height: 304px;
+    }
+}

@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "HealthAtHomeAPI": {
+    "local": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -17,6 +17,15 @@
       "applicationUrl": "https://localhost:7276;http://localhost:5276",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "prod": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7152;http://localhost:5105",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
       }
     },
     "IIS Express": {

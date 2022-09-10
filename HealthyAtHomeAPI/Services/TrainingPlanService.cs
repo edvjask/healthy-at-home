@@ -55,7 +55,7 @@ public class TrainingPlanService : ITrainingPlanService
 
         var newTrainingPlan = new TrainingPlan
         {
-            CreationDate = DateTime.Now,
+            CreationDate = DateTime.UtcNow,
             Exercises = chosenExercises,
             Name = options.Name,
             OwnerUid = decodedToken.Uid,
