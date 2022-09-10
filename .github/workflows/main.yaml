@@ -17,6 +17,7 @@ jobs:
           service_principal_password: ${{ secrets.service_principal_password }}
           tenant: ${{ secrets.tenant }}
           registry: ${{ secrets.registry }}
+          git_access_token: ${{ secrets.repo_token }}
           repository: ${{ secrets.repository }}
           image:  healthy-at-home
           branch: master
