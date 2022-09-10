@@ -44,4 +44,6 @@ jobs:
           manifests: |
             ./HealthyAtHomeAPI/Deploy/deployment.yaml
           images: '${{ secrets.registry }}.azurecr.io/${{ secrets.repository }}/healthy-at-home:${{ github.sha }}'
+          imagepullsecrets: |
+            acr-secret
           pull: false
