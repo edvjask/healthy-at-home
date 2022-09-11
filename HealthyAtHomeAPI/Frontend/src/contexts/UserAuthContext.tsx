@@ -66,6 +66,11 @@ export const UserContextProvider = ({children}: UserContextProviderProps) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       setLoading(false);
+
+      if (!result.user.emailVerified) {
+        setError("You need to verify your account. Please check your email.");
+      }
+
       return result;
     } catch (err) {
       setError("Invalid username or password");
@@ -101,8 +106,8 @@ export const UserContextProvider = ({children}: UserContextProviderProps) => {
     }
   };
 
-  const logoutUser = () => {
-    signOut(auth);
+  const logoutUser = async () => {
+    return await signOut(auth);
   };
 
   const forgotPassword = (email: string) => {

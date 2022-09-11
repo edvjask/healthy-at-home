@@ -45,7 +45,9 @@ export default function SignIn() {
 
     try {
       const resp = await signInUser(email, password);
-      if (resp) navigate("/");
+      if (resp && resp.user.emailVerified) {
+        navigate("/");
+      }
     } catch (er) {
 
     }

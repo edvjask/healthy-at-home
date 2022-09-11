@@ -18,6 +18,7 @@ public static class ExtensionMethods
 
     public static string RemoveQuotesAndNewlines(this string value)
     {
+        if (string.IsNullOrEmpty(value)) return "";
         var removeQuotes = value.Trim('"');
         return removeQuotes.Replace("\\n", "\n");
     }
