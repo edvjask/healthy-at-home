@@ -32,9 +32,10 @@ RUN apk upgrade musl
 #impersonate into new user
 USER dotnetuser
 WORKDIR /app
+EXPOSE 5000
 
 COPY --from=publish /app/publish .
 COPY --from=build-web /HealthyAtHomeAPI/Frontend/build ./wwwroot/
 
-ENTRYPOINT ["./HealthyAtHomeAPI", "--urls", "http://localhost:5000"]
+ENTRYPOINT ["./HealthyAtHome", "--urls", "http://localhost:5000"]
 
