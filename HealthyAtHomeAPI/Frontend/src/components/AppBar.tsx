@@ -1,4 +1,4 @@
-import {Box, IconButton, styled, Switch, Toolbar, Tooltip} from "@mui/material";
+import {Box, IconButton, styled, Switch, Toolbar, Tooltip, useMediaQuery, useTheme} from "@mui/material";
 import MuiAppBar, {AppBarProps as MuiAppBarProps} from "@mui/material/AppBar";
 import React from "react";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -43,11 +43,13 @@ export const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     }),
   }));
 
-  const {mode, toggleMode} = useThemeContext();
+    const {mode, toggleMode} = useThemeContext();
+    const theme = useTheme();
 
-  const {user, logoutUser} = useUserContext();
+    const {user} = useUserContext();
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleRedirectToLogin = () => {
     navigate("/login");
@@ -71,33 +73,35 @@ export const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
               aria-label="open drawer"
               onClick={toggleDrawer}
               sx={{
-                marginRight: "36px",
-                ...(open && {display: "none"}),
+                  marginRight: "36px",
+                  ...(open && {display: "none"}),
               }}
           >
-            <MenuIcon/>
+              <MenuIcon/>
           </IconButton>
-          <FitnessCenterIcon sx={{mr: 2, fill: "#DC851F"}}/>
-          <Typography
-              component={Link}
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{flexGrow: 1, textDecoration: "none"}}
-              to={"/"}
-          >
-            Healthy At Home
-          </Typography>
-          <Box sx={{display: "flex", gap: 1, alignItems: 'center',}}>
-            <Typography>Dark Mode</Typography>
-            <Switch
-                checked={mode === 'dark'}
-                onChange={handleSwitchChange}
-                inputProps={{'aria-label': 'controlled'}}
-            />
-            {user ? (
-                <UserInfoBox/>
-            ) : (
+            <FitnessCenterIcon sx={{mr: 2, fill: "#DC851F"}}/>
+            {!Boolean(isMobile) && (
+                <Typography
+                    component={Link}
+                    variant="h6"
+                    color="inherit"
+                    noWrap
+                    sx={{flexGrow: 1, textDecoration: "none"}}
+                    to={"/"}
+                >
+                    Healthy At Home
+                </Typography>
+            )}
+            <Box sx={{display: "flex", gap: 1, alignItems: 'center',}}>
+                <Typography>Dark Mode</Typography>
+                <Switch
+                    checked={mode === 'dark'}
+                    onChange={handleSwitchChange}
+                    inputProps={{'aria-label': 'controlled'}}
+                />
+                {user ? (
+                    <UserInfoBox/>
+                ) : (
                 <Tooltip title="Login">
                   <IconButton onClick={handleRedirectToLogin}>
                     <LoginIcon/>
