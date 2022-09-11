@@ -9,8 +9,8 @@ RUN dotnet publish "./HealthyAtHomeAPI.csproj" -c Release -o /app/publish \
     --runtime alpine-x64 \
     --self-contained true \
     /p:PublishTrimmed=true \
-    /p:PublishSingleFile=true
- 
+    /p:PublishSingleFile=true 
+
 
 FROM node:18-alpine3.16 AS build-web
 COPY ./HealthyAtHomeAPI/Frontend/package.json /HealthyAtHomeAPI/Frontend/package.json
@@ -37,5 +37,5 @@ EXPOSE 5000
 COPY --from=publish /app/publish .
 COPY --from=build-web /HealthyAtHomeAPI/Frontend/build ./wwwroot/
 
-ENTRYPOINT ["./HealthyAtHome", "--urls", "http://localhost:5000"]
+ENTRYPOINT ["./HealthyAtHome", "--urls", "http://0.0.0.0:5000"]
 
