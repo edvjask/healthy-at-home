@@ -1,18 +1,16 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS publish
 WORKDIR /src
-COPY ["HealthyAtHomeAPI/HealthyAtHomeAPI.csproj", "HealthyAtHomeAPI/"]
-RUN dotnet restore "HealthyAtHomeAPI/HealthyAtHomeAPI.csproj"
-COPY . .
-WORKDIR "/src/HealthyAtHomeAPI"
-RUN dotnet build "HealthyAtHomeAPI.csproj" -c Release -o /app/build
+COPY HealthyAtHomeAPI/HealthyAtHomeAPI.csproj ./
 
-FROM build AS publish
-RUN dotnet publish "HealthyAtHomeAPI.csproj" -c Release -o /app/publish
+RUN dotnet restore "./HealthyAtHomeAPI.csproj" --runtime alpine-x64
+COPY . .
+RUN dotnet publish "./HealthyAtHomeAPI.csproj" -c Release -o /app/publish \
+    --no-restore \
+    --runtime alpine-x64 \
+    --self-contained true \
+    /p:PublishTrimmed=true \
+    /p:PublishSingleFile=true
+ 
 
 FROM node:18-alpine3.16 AS build-web
 COPY ./HealthyAtHomeAPI/Frontend/package.json /HealthyAtHomeAPI/Frontend/package.json
@@ -20,12 +18,23 @@ COPY ./HealthyAtHomeAPI/Frontend/package-lock.json /HealthyAtHomeAPI/Frontend/pa
 WORKDIR /HealthyAtHomeAPI/Frontend
 RUN npm ci
 COPY ./HealthyAtHomeAPI/Frontend/ /HealthyAtHomeAPI/Frontend
-RUN npm run build
+RUN npm run build 
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/runtime-deps:6.0-alpine AS final
 
+#create new user and change directory ownership
+RUN adduser --disabled-password \
+    --home /app \
+    --gecos '' dotnetuser && chown -R dotnetuser /app 
+ 
+RUN apk upgrade musl
+
+#impersonate into new user
+USER dotnetuser
 WORKDIR /app
+
 COPY --from=publish /app/publish .
 COPY --from=build-web /HealthyAtHomeAPI/Frontend/build ./wwwroot/
-ENTRYPOINT ["dotnet", "HealthyAtHomeAPI.dll"]
+
+ENTRYPOINT ["./HealthyAtHomeAPI", "--urls", "http://localhost:5000"]
 
